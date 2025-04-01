@@ -1,0 +1,45 @@
+class GameNode:
+    def __init__(self, node_type, label, value=None):
+        self.type = node_type  # 'MAX' or 'MIN'
+        self.label = label
+        self.value = value
+        self.children = []
+terminal_values = {
+    'B1': [5, -1, 4],     # C1-C3
+    'B2': [3, -2, -5, 9, 8], # C4-C8
+    'B3': [6, 1, 4, 2, 4, 7, 3, -3] # C9-C16
+}
+def build_tree():
+    root = GameNode('MAX', 'A')
+    for i in range(1, 4):
+        b_node = GameNode('MIN', f'B{i}')
+        terminals = terminal_values[f'B{i}']  
+        for j, val in enumerate(terminals, 1):
+            c_node = GameNode('MAX', f'C{len(b_node.children)+1}', val)
+            b_node.children.append(c_node)       
+        root.children.append(b_node)
+    return root
+def alpha_beta(node, α, β, is_max):
+    if not node.children:
+        print(f"Evaluated {node.label} = {node.value}")
+        return node.value  
+    if is_max:
+        value = -float('inf')
+        for child in node.children:
+            value = max(value, alpha_beta(child, α, β, False))
+            α = max(α, value)
+            if β <= α:
+                print(f"β cutoff at {node.label} (α={α}, β={β})")
+                break
+        return value
+    else:
+        value = float('inf')
+        for child in node.children:
+            value = min(value, alpha_beta(child, α, β, True))
+            β = min(β, value)
+            if β <= α:
+                print(f"α cutoff at {node.label} (α={α}, β={β})")
+                break
+        return value
+optimal = alpha_beta(build_tree(), -float('inf'), float('inf'), True)
+print(f"Optimal value: {optimal}")
